@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PSOE · Programa de Salud, Organización y Ejercicio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F8F5;--card:#fff;--ink:#12332B;--mut:#58736B;--leaf:#2F8F5B;--sun:#F2A541;--line:#D5E5DD;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1F1A;--card:#16302A;--ink:#E6F3EC;--mut:#9DBBB0;--leaf:#4CC080;--line:#25453C;--on:#0E1F1A}}
+:root[data-theme="dark"]{--bg:#0E1F1A;--card:#16302A;--ink:#E6F3EC;--mut:#9DBBB0;--leaf:#4CC080;--line:#25453C;--on:#0E1F1A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+header{padding:28px 0 8px}
+h1{font-size:clamp(3rem,14vw,5.5rem);line-height:.9;margin:0;font-weight:800;letter-spacing:-.04em;color:var(--leaf)}
+.sub{margin:10px 0 0;color:var(--mut);max-width:34ch}
+nav{display:flex;gap:6px;margin:22px 0 18px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:2;overflow-x:auto}
+nav button,.chips button{font:inherit;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px;border-radius:99px;cursor:pointer;white-space:nowrap}
+nav button[aria-selected=true],.chips button[aria-pressed=true]{background:var(--leaf);border-color:var(--leaf);color:var(--on);font-weight:600}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+section[hidden]{display:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 4px;font-size:1.1rem}
+.card p{margin:0;color:var(--mut);font-size:.94rem}
+.tag{display:inline-block;margin-top:10px;font-size:.82rem;font-weight:600;color:var(--leaf)}
+.ex{display:flex;gap:14px;align-items:flex-start}
+.ex b{flex:none;min-width:64px;text-align:center;background:var(--sun);color:#12332B;border-radius:10px;padding:6px 4px;font-size:.9rem}
+.water{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.glasses{display:flex;gap:6px;flex-wrap:wrap}
+.glasses button{width:34px;height:44px;border-radius:4px 4px 10px 10px;border:2px solid var(--leaf);background:transparent;cursor:pointer}
+.glasses button[aria-pressed=true]{background:var(--leaf)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:10px 6px;text-align:center;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;padding-left:12px}
+td input{width:22px;height:22px;accent-color:var(--leaf)}
+.reset{margin-top:14px;font:inherit;background:none;border:none;color:var(--mut);text-decoration:underline;cursor:pointer}
+.note{margin-top:28px;font-size:.84rem;color:var(--mut)}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>PSOE</h1>
+<p class="sub">Programa de Salud, Organización y Ejercicio. Come bien, muévete y lleva tu semana al día.</p>
+</header>
+
+<nav role="tablist" aria-label="Secciones">
+<button role="tab" aria-selected="true" data-t="comidas">Comidas</button>
+<button role="tab" aria-selected="false" data-t="ejercicios">Ejercicios</button>
+<button role="tab" aria-selected="false" data-t="semana">Mi semana</button>
+</nav>
+
+<section id="comidas">
+<div class="chips" id="chips"></div>
+<div class="grid" id="foods"></div>
+</section>
+
+<section id="ejercicios" hidden>
+<div class="grid" style="grid-template-columns:1fr" id="exs"></div>
+</section>
+
+<section id="semana" hidden>
+<div class="card water">
+<div><h3 style="margin:0">Agua de hoy</h3><p id="wtxt">0 de 8 vasos</p></div>
+<div class="glasses" id="glasses"></div>
+</div>
+<div class="scroll">
+<table id="plan"></table>
+</div>
+<button class="reset" id="reset">Borrar la semana</button>
+</section>
+
+<p class="note">PSOE ofrece ideas generales de bienestar y no sustituye el consejo de un médico o nutricionista. Si tienes una condición de salud, consúltalo antes de cambiar tu dieta o tu actividad física.</p>
+</div>
+
+<script>
+var FOODS=[
+["Desayuno","Avena con fruta","Avena cocida con plátano y canela. Da energía que dura toda la mañana.","Fibra"],
+["Desayuno","Huevos con tomate","Huevos revueltos con tomate y una tostada integral.","Proteína"],
+["Desayuno","Yogur con nueces","Yogur natural sin azúcar, nueces y un poco de miel.","Calcio"],
+["Comida","Lentejas con verduras","Lentejas guisadas con zanahoria y espinacas.","Hierro"],
+["Comida","Pollo a la plancha","Pechuga con ensalada de lechuga, pepino y aguacate.","Proteína"],
+["Comida","Arroz integral con atún","Arroz integral, atún, maíz y pimiento en una sola olla.","Omega 3"],
+["Cena","Sopa de verduras","Calabacín, puerro y zanahoria. Ligera y fácil de digerir.","Vitaminas"],
+["Cena","Pescado al horno","Filete de merluza con limón y papas al horno.","Proteína"],
+["Cena","Tortilla de espinacas","Dos huevos con espinacas y cebolla, sin mucho aceite.","Hierro"],
+["Snack","Manzana con crema de maní","Una manzana en rodajas con una cucharada de crema de maní.","Fibra"],
+["Snack","Zanahoria con hummus","Bastones de zanahoria con hummus de garbanzo.","Vitamina A"],
+["Snack","Puñado de almendras","Unas 15 almendras naturales, sin sal.","Grasas buenas"]];
+var EX=[
+["10 min","Calentamiento","30 s de trote en el lugar, 30 s de círculos de brazos, 30 s de sentadillas suaves. Repite 3 veces."],
+["20 min","Circuito en casa","Sentadillas, flexiones (en rodillas si hace falta), zancadas y plancha. 40 s de trabajo y 20 s de descanso. 4 rondas."],
+["30 min","Caminata rápida","Camina a un paso en el que puedas hablar pero no cantar. Ideal para empezar o para días de descanso activo."],
+["10 min","Estiramientos","Cuello, hombros, espalda baja, piernas y cadera. Mantén cada postura 30 s sin rebotar."],
+["15 min","Core y espalda","Plancha, puente de glúteos y superman. 3 series de 30 s cada ejercicio."]];
+var DAYS=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],HAB=["Ejercicio","Comida sana","Dormir 7 h"];
+function $(i){return document.getElementById(i)}
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+// pestañas
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){
+document.querySelectorAll("nav button").forEach(function(x){x.setAttribute("aria-selected",x===b)});
+["comidas","ejercicios","semana"].forEach(function(s){$(s).hidden=s!==b.dataset.t})}});
+
+// comidas
+var cats=["Todas","Desayuno","Comida","Cena","Snack"],cur="Todas";
+function drawFoods(){
+$("chips").innerHTML="";
+cats.forEach(function(c){var b=document.createElement("button");b.textContent=c;b.setAttribute("aria-pressed",c===cur);b.onclick=function(){cur=c;drawFoods()};$("chips").appendChild(b)});
+$("foods").innerHTML=FOODS.filter(function(f){return cur==="Todas"||f[0]===cur}).map(function(f){
+return '<article class="card"><h3>'+f[1]+'</h3><p>'+f[2]+'</p><span class="tag">'+f[3]+' · '+f[0]+'</span></article>'}).join("")}
+drawFoods();
+
+// ejercicios
+$("exs").innerHTML=EX.map(function(e){return '<article class="card ex"><b>'+e[0]+'</b><div><h3>'+e[1]+'</h3><p>'+e[2]+'</p></div></article>'}).join("");
+
+// semana
+var plan=load("psoe-plan",{});
+function drawPlan(){
+var h='<tr><th></th>'+DAYS.map(function(d){return '<th>'+d+'</th>'}).join("")+'</tr>';
+HAB.forEach(function(x,i){h+='<tr><td>'+x+'</td>'+DAYS.map(function(d,j){var k=i+"-"+j;
+return '<td><input type="checkbox" data-k="'+k+'" aria-label="'+x+' '+d+'"'+(plan[k]?" checked":"")+'></td>'}).join("")+'</tr>'});
+$("plan").innerHTML=h;
+$("plan").querySelectorAll("input").forEach(function(c){c.onchange=function(){plan[c.dataset.k]=c.checked;save("psoe-plan",plan)}})}
+drawPlan();
+var today=new Date().toDateString(),w=load("psoe-water",{d:today,n:0});
+if(w.d!==today)w={d:today,n:0};
+function drawWater(){
+$("glasses").innerHTML="";
+for(var i=1;i<=8;i++){(function(i){var b=document.createElement("button");b.setAttribute("aria-label","Vaso "+i);b.setAttribute("aria-pressed",i<=w.n);
+b.onclick=function(){w.n=(w.n===i)?i-1:i;save("psoe-water",w);drawWater()};$("glasses").appendChild(b)})(i)}
+$("wtxt").textContent=w.n+" de 8 vasos"}
+drawWater();
+$("reset").onclick=function(){plan={};save("psoe-plan",plan);drawPlan()};
+</script>
+</body>
+</html>
